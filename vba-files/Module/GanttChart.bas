@@ -98,7 +98,7 @@ Sub 稲妻線を描画する()
     If todayCell Is Nothing Then
         MsgBox "当日日付がシート内に存在しません。" & vbCrLf _
         & "対象日付：" & Date
-        End
+        Exit Sub
     End If
     
     todayColumn = todayCell.Column
@@ -215,7 +215,7 @@ Sub 当日線を描画する()
     If foundCell Is Nothing Then
         MsgBox "当日日付がシート内に存在しません。" & vbCrLf _
             & "対象日付：" & toDay
-        End
+        Exit Sub
     End If
     
     todayColumn = foundCell.Column
@@ -482,7 +482,7 @@ Sub WSBを初期化する()
 InputData:
     startDate = InputBox("開始日を入力してください。(yyyy/MM/dd)", "カレンダー設定")
     If StrPtr(startDate) = 0 Then
-        End
+        Exit Sub
     ElseIf Not IsDate(startDate) Then
         MsgBox "yyyy/MM/dd形式で入力してください。"
         GoTo InputData
@@ -490,7 +490,7 @@ InputData:
     
     endDate = InputBox("終了日を入力してください。(yyyy/MM/dd)", "カレンダー設定")
     If StrPtr(endDate) = 0 Then
-        End
+        Exit Sub
     ElseIf Not IsDate(endDate) Then
         MsgBox "yyyy/MM/dd形式で入力してください。"
         GoTo InputData
