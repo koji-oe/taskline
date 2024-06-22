@@ -275,13 +275,13 @@ Public Sub カレンダーの条件付き書式を作成する()
     End With
     calendarRange.Borders(xlEdgeRight).LineStyle = xlNone
     With calendarRange.Borders(xlInsideVertical)
-        .LineStyle = xlDot
+        .LineStyle = xlContinuous
         .ColorIndex = xlAutomatic
         .TintAndShade = 0
         .Weight = xlThin
     End With
     With calendarRange.Borders(xlInsideHorizontal)
-        .LineStyle = xlDot
+        .LineStyle = xlContinuous
         .ColorIndex = xlAutomatic
         .TintAndShade = 0
         .Weight = xlThin
