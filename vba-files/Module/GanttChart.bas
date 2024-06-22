@@ -278,13 +278,13 @@ Public Sub カレンダーの条件付き書式を作成する()
         .LineStyle = xlContinuous
         .ColorIndex = xlAutomatic
         .TintAndShade = 0
-        .Weight = xlThin
+        .Weight = xlHairline
     End With
     With calendarRange.Borders(xlInsideHorizontal)
         .LineStyle = xlContinuous
         .ColorIndex = xlAutomatic
         .TintAndShade = 0
-        .Weight = xlThin
+        .Weight = xlHairline
     End With
     
     ' -------------------------------------------------------------------------
