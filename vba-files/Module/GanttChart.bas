@@ -261,6 +261,33 @@ Public Sub カレンダーの条件付き書式を作成する()
     )
     
     ' -------------------------------------------------------------------------
+    ' 格子書式を設定する
+    ' -------------------------------------------------------------------------
+    calendarRange.Borders(xlDiagonalDown).LineStyle = xlNone
+    calendarRange.Borders(xlDiagonalUp).LineStyle = xlNone
+    calendarRange.Borders(xlEdgeLeft).LineStyle = xlNone
+    calendarRange.Borders(xlEdgeTop).LineStyle = xlNone
+    With calendarRange.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ThemeColor = 1
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    calendarRange.Borders(xlEdgeRight).LineStyle = xlNone
+    With calendarRange.Borders(xlInsideVertical)
+        .LineStyle = xlDot
+        .ColorIndex = xlAutomatic
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With calendarRange.Borders(xlInsideHorizontal)
+        .LineStyle = xlDot
+        .ColorIndex = xlAutomatic
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    
+    ' -------------------------------------------------------------------------
     ' 週末セルの書式を設定する
     ' -------------------------------------------------------------------------
     Dim dateCell As String
