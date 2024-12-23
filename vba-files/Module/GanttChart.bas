@@ -1,5 +1,4 @@
 Attribute VB_Name = "GanttChart"
-
 Public Sub 実績線を描画する()
 
     Application.ScreenUpdating = False
@@ -33,15 +32,20 @@ Public Sub 実績線を描画する()
             GoTo Continue
         End If
 
-        ' ステータスが対応完了、対応中、保留でない場合
+        ' 処理対象ステータス出ない場合、スキップする
         status = Cells(i, statusColumn).Value
-        If status <> "対応完了" And status <> "対応中" And status <> "保留" Then
+        If Not isJissekiTargetStatus(status) Then
             GoTo Continue
         End If
         
-        ' 開始日、終了日、進捗率を取得
+        ' 開始日、終了日を取得(必須)
         startDate = Cells(i, startDateColumn).Value
         endDate = Cells(i, endDateColumn).Value
+        If Not isEntered(startDate, endDate) Then
+            GoTo Continue
+        End If
+        
+        ' 進捗率を取得
         percentage = Cells(i, percentageColumn).Value
         
         ' カレンダー行から開始日セル、終了日セルを取得
@@ -140,8 +144,10 @@ Sub 稲妻線を描画する()
             GoTo Continue
         End If
 
-        ' ステータスが"対応中"、"保留"でない場合、スキップする
-        If Cells(i, Range("_status").Column) <> "対応中" And Cells(i, Range("_status").Column) <> "保留" Then
+        ' 処理対象ステータスでない場合、スキップする
+        Dim status As String
+        status = Cells(i, Range("_status").Column).Value
+        If Not isInazumaTargetStatus(status) Then
             GoTo Continue
         End If
         
@@ -149,6 +155,10 @@ Sub 稲妻線を描画する()
         startDate = Cells(i, Range("_startDate").Column).Value
         endDate = Cells(i, Range("_endDate").Column).Value
         percentage = Cells(i, Range("_progress").Column).Value
+        
+        If Not isEntered(startDate, endDate) Then
+            GoTo Continue
+        End If
         
         ' 開始日の列番号を取得
         Set startDateCell = Rows(Range("_calendar").Row).Find(What:=DateValue(startDate), LookIn:=xlFormulas)
@@ -254,6 +264,9 @@ Public Sub カレンダーの条件付き書式を作成する()
     Dim calendarRange As Range
     Dim calendarRangeCondition As FormatCondition
     
+    ' -------------------------------------------------------------------------
+    ' 書式を初期化する
+    ' -------------------------------------------------------------------------
     Worksheets("WBS").Activate
     Set calendarRange = Range( _
         Range("_calendar").Offset(3, 0), _
@@ -344,12 +357,11 @@ End Sub
 
 Public Sub テーブルの条件付き書式を作成する()
 
-    Dim tableRange As Range
-
     ' -------------------------------------------------------------------------
     ' 書式を初期化する
     ' -------------------------------------------------------------------------
     ' 書式範囲取得
+    Dim tableRange As Range
     Set tableRange = Range("WBS")
     
     ' -------------------------------------------------------------------------
@@ -402,14 +414,37 @@ Public Sub テーブルの条件付き書式を作成する()
     )
     tableRangeCondition.Interior.ColorIndex = 15
     
-    ' 終了日 < 当日日付の場合、行を赤塗
+    ' 終了日 < 当日日付の場合、赤文字
     Dim endDateCell As String
     endDateCell = Range("_endDate").Offset(1, 0).Address(False, True)
     Set tableRangeCondition = tableRange.FormatConditions.Add( _
         Type:=xlExpression, _
         Formula1:="=AND(" & endDateCell & "<TODAY()," & endDateCell & "<>"""")" _
     )
-    tableRangeCondition.Interior.ColorIndex = 3
+    tableRangeCondition.Font.ColorIndex = 3
+    
+    ' 大分類が入力されている場合下線を引き太字にする
+    Dim categoryCell As String
+    categoryCell = Range("_category").Offset(1, 0).Address(False, True)
+    Set tableRangeCondition = tableRange.FormatConditions.Add( _
+        Type:=xlExpression, _
+        Formula1:="=" & categoryCell & "<>""""" _
+    )
+    With tableRangeCondition.Font
+        .Underline = xlUnderlineStyleSingle
+        .Bold = True
+    End With
+    
+    ' 工程が入力されている場合青塗する
+    Dim phaseCell As String
+    phaseCell = Range("_phase").Offset(1, 0).Address(False, True)
+    Set tableRangeCondition = tableRange.FormatConditions.Add( _
+        Type:=xlExpression, _
+        Formula1:="=" & phaseCell & "<>""""" _
+    )
+    tableRangeCondition.Interior.Color = vbBlue
+    tableRangeCondition.Font.Color = vbWhite
+    tableRangeCondition.Font.Bold = True
     
 End Sub
 
@@ -433,11 +468,12 @@ NoteError:
     Dim endDateCell As Range
     Dim endColumn As Integer
     Dim endDate As Date
-    Dim endDateColumn As Integer, categoryColumn As Integer, subCategoryColumn As Integer, subSubCategoryColumn As Integer
+    Dim startDateColumn As Integer, endDateColumn As Integer, categoryColumn As Integer, subCategoryColumn As Integer, subSubCategoryColumn As Integer
     Dim category As String, subCategory As String, subSubCategory As String
     Dim noteMessage As String
     Dim comment As comment
     
+    startDateColumn = Range("_startDate").Column
     endDateColumn = Range("_endDate").Column
     categoryColumn = Range("_category").Column
     subCategoryColumn = Range("_subCategory").Column
@@ -574,3 +610,27 @@ InputData:
     Application.ScreenUpdating = True
 
 End Sub
+
+Function isJissekiTargetStatus(status As String) As Boolean
+    If status = "対応完了" _
+        Or status = "対応中" _
+        Or status = "保留" _
+        Or status = "未対応" Then
+        isJissekiTargetStatus = True
+        Exit Function
+    End If
+    isJissekiTargetStatus = False
+End Function
+
+Function isInazumaTargetStatus(status As String) As Boolean
+    If status = "対応中" _
+        Or status = "未対応" Then
+        isInazumaTargetStatus = True
+        Exit Function
+    End If
+    isInazumaTargetStatus = False
+End Function
+
+Function isEntered(startDate, endDate) As Boolean
+    isEntered = IsDate(startDate) And IsDate(endDate)
+End Function
